@@ -3,6 +3,7 @@ package mgowrap
 import (
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
+	"reflect"
 )
 
 type PersistentObject interface {
@@ -17,11 +18,76 @@ func (db *Database) Save(po PersistentObject) (err error) {
 	return
 }
 
-func (db *Database) FindAll(collectionName string, query interface{}, result interface{}) (err error) {
-	db.CollectionDo(collectionName, func(c *mgo.Collection) {
-		err = c.Find(query).All(result)
+func (db *Database) SaveAll(items []interface{}) (err error) {
+	if len(items) == 0 {
+		return
+	}
+	item := reflect.ValueOf(items[0]).Elem()
+	db.CollectionDo(callCollectionName(item), func(rc *mgo.Collection) {
+		err = rc.Insert(items...)
+	})
+
+	return
+}
+
+func (db *Database) Find(query, result interface{}) (err error) {
+	item := reflect.ValueOf(result).Elem()
+	db.CollectionDo(callCollectionName(item), func(c *mgo.Collection) {
+		err = c.Find(query).One(result)
 	})
 	return
+}
+
+func (db *Database) FindAll(query interface{}, result interface{}, sortFields ...string) (err error) {
+	resultv := reflect.ValueOf(result)
+	resultvKind := resultv.Kind()
+	slicev := resultv.Elem()
+
+	if resultvKind != reflect.Ptr || slicev.Kind() != reflect.Slice {
+		panic("result argument must be a slice address")
+	}
+
+	element := slicev.Type().Elem().Elem()
+	newValue := reflect.New(element)
+
+	db.CollectionDo(callCollectionName(newValue), func(c *mgo.Collection) {
+		if len(sortFields) == 0 {
+			err = c.Find(query).All(result)
+		} else {
+			err = c.Find(query).Sort(sortFields...).All(result)
+		}
+	})
+	return
+}
+
+func (db *Database) Delete(po PersistentObject, selector interface{}) (err error) {
+	db.CollectionDo(po.CollectionName(), func(rc *mgo.Collection) {
+		err = rc.Remove(selector)
+	})
+	return
+}
+
+func (db *Database) DeleteAll(po PersistentObject, selector interface{}) (info *mgo.ChangeInfo, err error) {
+	db.CollectionDo(po.CollectionName(), func(rc *mgo.Collection) {
+		info, err = rc.RemoveAll(selector)
+	})
+	return
+}
+
+func (db *Database) Count(po PersistentObject, selector bson.M) (count int, err error) {
+	db.CollectionDo(po.CollectionName(), func(rc *mgo.Collection) {
+		count, err = rc.Find(selector).Count()
+	})
+	return
+}
+
+func callCollectionName(value reflect.Value) string {
+	method := value.MethodByName("CollectionName")
+	if !method.IsValid() {
+		panic(value.String() + ` does not implement "CollectionName" method`)
+	}
+
+	return method.Call([]reflect.Value{})[0].String()
 }
 
 // func (db *Database) DropCollection(collectionName string) (err error) {
@@ -40,13 +106,6 @@ func (db *Database) FindAll(collectionName string, query interface{}, result int
 // 			}
 // 		}
 // 	}, collectionNames...)
-// 	return
-// }
-
-// func (db *Database) Delete(collectionName string, id interface{}) (err error) {
-// 	db.CollectionDo(collectionName, func(rc *mgo.Collection) {
-// 		_, err = rc.RemoveAll(bson.M{"_id": id})
-// 	})
 // 	return
 // }
 
