@@ -36,6 +36,18 @@ func SaveAll(items []interface{}) error {
 	return defaultDatabase.SaveAll(items)
 }
 
+func FindById(id bson.ObjectId, result interface{}) (err error) {
+	return defaultDatabase.Find(bson.M{"_id": id}, result)
+}
+
+func FindByIdHex(idHex string, result interface{}) (err error) {
+	id, err := ToObjectId(idHex)
+	if err != nil {
+		return
+	}
+	return defaultDatabase.FindById(id, result)
+}
+
 func Find(query, result interface{}) error {
 	return defaultDatabase.Find(query, result)
 }

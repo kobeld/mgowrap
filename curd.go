@@ -30,6 +30,18 @@ func (db *Database) SaveAll(items []interface{}) (err error) {
 	return
 }
 
+func (db *Database) FindById(id bson.ObjectId, result interface{}) (err error) {
+	return db.Find(bson.M{"_id": id}, result)
+}
+
+func (db *Database) FindByIdHex(idHex string, result interface{}) (err error) {
+	id, err := ToObjectId(idHex)
+	if err != nil {
+		return
+	}
+	return db.FindById(id, result)
+}
+
 func (db *Database) Find(query, result interface{}) (err error) {
 	item := reflect.ValueOf(result).Elem()
 	db.CollectionDo(callCollectionName(item), func(c *mgo.Collection) {
