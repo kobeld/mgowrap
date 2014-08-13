@@ -60,6 +60,20 @@ func (db *Database) FindAll(query interface{}, result interface{}, sortFields ..
 	return
 }
 
+func (db *Database) Update(po PersistentObject, selector, changer interface{}) (err error) {
+	db.CollectionDo(po.CollectionName(), func(rc *mgo.Collection) {
+		err = rc.Update(selector, changer)
+	})
+	return
+}
+
+func (db *Database) UpdateAll(po PersistentObject, selector, changer interface{}) (info *mgo.ChangeInfo, err error) {
+	db.CollectionDo(po.CollectionName(), func(rc *mgo.Collection) {
+		info, err = rc.UpdateAll(selector, changer)
+	})
+	return
+}
+
 func (db *Database) Delete(po PersistentObject, selector interface{}) (err error) {
 	db.CollectionDo(po.CollectionName(), func(rc *mgo.Collection) {
 		err = rc.Remove(selector)

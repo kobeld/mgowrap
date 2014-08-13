@@ -44,6 +44,14 @@ func FindAll(query interface{}, result interface{}, sortFilelds ...string) error
 	return defaultDatabase.FindAll(query, result, sortFilelds...)
 }
 
+func Update(po PersistentObject, selector, changer interface{}) error {
+	return defaultDatabase.Update(po, selector, changer)
+}
+
+func UpdateAll(po PersistentObject, selector, changer interface{}) (*mgo.ChangeInfo, error) {
+	return defaultDatabase.UpdateAll(po, selector, changer)
+}
+
 func Delete(po PersistentObject, selector interface{}) error {
 	return defaultDatabase.Delete(po, selector)
 }
