@@ -67,6 +67,13 @@ func (db *Database) Update(po PersistentObject, selector, changer interface{}) (
 	return
 }
 
+func (db *Database) UpdateInstance(po PersistentObject, changer interface{}) (err error) {
+	db.CollectionDo(po.CollectionName(), func(rc *mgo.Collection) {
+		err = rc.Update(bson.M{"_id": po.MakeId()}, changer)
+	})
+	return
+}
+
 func (db *Database) UpdateAll(po PersistentObject, selector, changer interface{}) (info *mgo.ChangeInfo, err error) {
 	db.CollectionDo(po.CollectionName(), func(rc *mgo.Collection) {
 		info, err = rc.UpdateAll(selector, changer)

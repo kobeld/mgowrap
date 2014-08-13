@@ -48,6 +48,10 @@ func Update(po PersistentObject, selector, changer interface{}) error {
 	return defaultDatabase.Update(po, selector, changer)
 }
 
+func UpdateInstance(po PersistentObject, changer interface{}) error {
+	return defaultDatabase.UpdateInstance(po, changer)
+}
+
 func UpdateAll(po PersistentObject, selector, changer interface{}) (*mgo.ChangeInfo, error) {
 	return defaultDatabase.UpdateAll(po, selector, changer)
 }
