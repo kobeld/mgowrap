@@ -3,7 +3,8 @@ package mgowrap
 import (
 	"encoding/hex"
 	"fmt"
-	"labix.org/v2/mgo/bson"
+
+	"gopkg.in/mgo.v2/bson"
 )
 
 func ToObjectId(idHex string) (bid bson.ObjectId, err error) {

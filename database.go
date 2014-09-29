@@ -1,8 +1,6 @@
 package mgowrap
 
-import (
-	"labix.org/v2/mgo"
-)
+import "gopkg.in/mgo.v2"
 
 type Database struct {
 	DialString string
