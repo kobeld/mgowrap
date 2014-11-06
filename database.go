@@ -1,10 +1,6 @@
 package mgowrap
 
-import (
-	"log"
-
-	"gopkg.in/mgo.v2"
-)
+import "gopkg.in/mgo.v2"
 
 type Database struct {
 	DialString string
@@ -34,9 +30,6 @@ func (db *Database) GetOrDialSession() (session *mgo.Session) {
 	session = ConnectedSessions[db.DialString]
 	if session == nil {
 		var err error
-		log.Println("xxxxxxxxxxxxx  debug ---------beg ")
-		log.Println(db.DialString)
-		log.Println("xxxxxxxxxxxxx  debug -------- end")
 		session, err = mgo.Dial(db.DialString)
 		if err != nil {
 			panic(err)
