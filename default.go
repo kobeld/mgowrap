@@ -7,6 +7,10 @@ import (
 
 var defaultDatabase *Database
 
+func DefaultDatabase() *Database {
+	return defaultDatabase
+}
+
 func SetupDatbase(dialString string, name string) {
 	defaultDatabase = NewDatabase(dialString, name)
 }
