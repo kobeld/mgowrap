@@ -10,12 +10,10 @@ import (
 type PersistentObject interface {
 	CollectionName() string
 	MakeId() interface{}
-	SetTimeStamp()
 }
 
 func (db *Database) Save(po PersistentObject) (err error) {
 	db.CollectionDo(po.CollectionName(), func(rc *mgo.Collection) {
-		po.SetTimeStamp()
 		_, err = rc.Upsert(bson.M{"_id": po.MakeId()}, po)
 	})
 	return
