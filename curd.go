@@ -73,6 +73,13 @@ func (db *Database) FindAll(query interface{}, result interface{}, sortFields ..
 	return
 }
 
+func (db *Database) Upsert(po PersistentObject, selector, changer interface{}) (changeInfo *mgo.ChangeInfo, err error) {
+	db.CollectionDo(po.CollectionName(), func(rc *mgo.Collection) {
+		changeInfo, err = rc.Upsert(selector, changer)
+	})
+	return
+}
+
 func (db *Database) Update(po PersistentObject, selector, changer interface{}) (err error) {
 	db.CollectionDo(po.CollectionName(), func(rc *mgo.Collection) {
 		err = rc.Update(selector, changer)

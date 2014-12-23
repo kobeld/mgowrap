@@ -60,6 +60,10 @@ func FindAll(query interface{}, result interface{}, sortFilelds ...string) error
 	return defaultDatabase.FindAll(query, result, sortFilelds...)
 }
 
+func Upsert(po PersistentObject, selector, changer interface{}) (*mgo.ChangeInfo, error) {
+	return defaultDatabase.Upsert(po, selector, changer)
+}
+
 func Update(po PersistentObject, selector, changer interface{}) error {
 	return defaultDatabase.Update(po, selector, changer)
 }
