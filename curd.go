@@ -131,12 +131,12 @@ func callCollectionName(value reflect.Value) string {
 	return method.Call([]reflect.Value{})[0].String()
 }
 
-// func (db *Database) DropCollection(collectionName string) (err error) {
-// 	db.CollectionDo(collectionName, func(rc *mgo.Collection) {
-// 		err = rc.DropCollection()
-// 	})
-// 	return
-// }
+func (db *Database) DropCollection(collectionName string) (err error) {
+	db.CollectionDo(collectionName, func(rc *mgo.Collection) {
+		err = rc.DropCollection()
+	})
+	return
+}
 
 // func (db *Database) DropCollections(collectionNames ...string) (err error) {
 // 	db.CollectionsDo(func(rcs ...*mgo.Collection) {

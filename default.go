@@ -19,6 +19,13 @@ func DropDatabase() (err error) {
 	return defaultDatabase.DropDatabase()
 }
 
+func DropCollection(name string) (err error) {
+	defaultDatabase.CollectionDo(name, func(rc *mgo.Collection) {
+		err = rc.DropCollection()
+	})
+	return
+}
+
 func DatabaseDo(f func(db *mgo.Database)) {
 	defaultDatabase.DatabaseDo(f)
 }
