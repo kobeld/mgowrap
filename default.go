@@ -15,6 +15,10 @@ func SetupDatbase(dialString string, name string) {
 	defaultDatabase = NewDatabase(dialString, name)
 }
 
+func DropDatabase() (err error) {
+	return defaultDatabase.DropDatabase()
+}
+
 func DatabaseDo(f func(db *mgo.Database)) {
 	defaultDatabase.DatabaseDo(f)
 }

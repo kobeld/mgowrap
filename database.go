@@ -39,10 +39,17 @@ func (db *Database) GetOrDialSession() (session *mgo.Session) {
 	return
 }
 
-func (db *Database) DatabaseDo(f func(db *mgo.Database)) {
-	s := db.GetOrDialSession().Copy()
+func (this *Database) DropDatabase() (err error) {
+	this.DatabaseDo(func(db *mgo.Database) {
+		err = db.DropDatabase()
+	})
+	return
+}
+
+func (this *Database) DatabaseDo(f func(db *mgo.Database)) {
+	s := this.GetOrDialSession().Copy()
 	defer s.Close()
-	f(s.DB(db.Name))
+	f(s.DB(this.Name))
 }
 
 func (db *Database) CollectionDo(name string, f func(c *mgo.Collection)) {
