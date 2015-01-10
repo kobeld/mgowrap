@@ -98,3 +98,7 @@ func DeleteAll(po PersistentObject, selector interface{}) (*mgo.ChangeInfo, erro
 func Count(po PersistentObject, selector bson.M) (int, error) {
 	return defaultDatabase.Count(po, selector)
 }
+
+func HasAny(po PersistentObject, selector bson.M) (bool, error) {
+	return defaultDatabase.HasAny(po, selector)
+}

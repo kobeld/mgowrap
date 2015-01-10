@@ -122,6 +122,16 @@ func (db *Database) Count(po PersistentObject, selector bson.M) (count int, err 
 	return
 }
 
+func (db *Database) HasAny(po PersistentObject, selector bson.M) (r bool, err error) {
+	count, err := db.Count(po, selector)
+	if err != nil {
+		return
+	}
+
+	r = (count > 0)
+	return
+}
+
 func callCollectionName(value reflect.Value) string {
 	method := value.MethodByName("CollectionName")
 	if !method.IsValid() {
