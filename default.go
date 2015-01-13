@@ -87,7 +87,7 @@ func UpdateAll(po PersistentObject, selector, changer interface{}) (*mgo.ChangeI
 	return defaultDatabase.UpdateAll(po, selector, changer)
 }
 
-func Delete(po PersistentObject, selector interface{}) error {
+func Delete(po PersistentObject, selector interface{}) (bool, error) {
 	return defaultDatabase.Delete(po, selector)
 }
 

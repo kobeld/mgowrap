@@ -48,6 +48,11 @@ func (db *Database) Find(query, result interface{}) (err error) {
 	db.CollectionDo(callCollectionName(item), func(c *mgo.Collection) {
 		err = c.Find(query).One(result)
 	})
+
+	if err == mgo.ErrNotFound {
+		err = nil
+	}
+
 	return
 }
 
@@ -101,11 +106,19 @@ func (db *Database) UpdateAll(po PersistentObject, selector, changer interface{}
 	return
 }
 
-func (db *Database) Delete(po PersistentObject, selector interface{}) (err error) {
+func (db *Database) Delete(po PersistentObject, selector interface{}) (ok bool, err error) {
 	db.CollectionDo(po.CollectionName(), func(rc *mgo.Collection) {
 		err = rc.Remove(selector)
 	})
-	return
+
+	if err != nil {
+		if err == mgo.ErrNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
 }
 
 func (db *Database) DeleteAll(po PersistentObject, selector interface{}) (info *mgo.ChangeInfo, err error) {
