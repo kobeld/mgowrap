@@ -91,6 +91,10 @@ func Delete(po PersistentObject, selector interface{}) (bool, error) {
 	return defaultDatabase.Delete(po, selector)
 }
 
+func DeleteInstance(po PersistentObject) (bool, error) {
+	return defaultDatabase.DeleteInstance(po)
+}
+
 func DeleteAll(po PersistentObject, selector interface{}) (*mgo.ChangeInfo, error) {
 	return defaultDatabase.DeleteAll(po, selector)
 }

@@ -121,6 +121,10 @@ func (db *Database) Delete(po PersistentObject, selector interface{}) (ok bool, 
 	return true, nil
 }
 
+func (db *Database) DeleteInstance(po PersistentObject) (ok bool, err error) {
+	return db.Delete(po, bson.M{"_id": po.MakeId()})
+}
+
 func (db *Database) DeleteAll(po PersistentObject, selector interface{}) (info *mgo.ChangeInfo, err error) {
 	db.CollectionDo(po.CollectionName(), func(rc *mgo.Collection) {
 		info, err = rc.RemoveAll(selector)
