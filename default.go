@@ -67,6 +67,10 @@ func Find(query, result interface{}) error {
 	return defaultDatabase.Find(query, result)
 }
 
+func FindAndSelect(query, selector, result interface{}) error {
+	return defaultDatabase.FindAndSelect(query, selector, result)
+}
+
 func FindAll(query interface{}, result interface{}, sortFilelds ...string) error {
 	return defaultDatabase.FindAll(query, result, sortFilelds...)
 }

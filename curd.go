@@ -56,6 +56,19 @@ func (db *Database) Find(query, result interface{}) (err error) {
 	return
 }
 
+func (db *Database) FindAndSelect(query, selector, result interface{}) (err error) {
+	item := reflect.ValueOf(result).Elem()
+	db.CollectionDo(callCollectionName(item), func(c *mgo.Collection) {
+		err = c.Find(query).Select(selector).One(result)
+	})
+
+	if err == mgo.ErrNotFound {
+		err = nil
+	}
+
+	return
+}
+
 func (db *Database) FindAll(query interface{}, result interface{}, sortFields ...string) (err error) {
 	resultv := reflect.ValueOf(result)
 	resultvKind := resultv.Kind()
