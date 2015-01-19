@@ -71,6 +71,10 @@ func FindAndSelect(query, selector, result interface{}) error {
 	return defaultDatabase.FindAndSelect(query, selector, result)
 }
 
+func FindAndApply(query interface{}, change mgo.Change, result interface{}) (*mgo.ChangeInfo, error) {
+	return defaultDatabase.FindAndApply(query, change, result)
+}
+
 func FindAll(query interface{}, result interface{}, sortFilelds ...string) error {
 	return defaultDatabase.FindAll(query, result, sortFilelds...)
 }
