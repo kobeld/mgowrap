@@ -110,18 +110,34 @@ func (db *Database) Upsert(po PersistentObject, selector, changer interface{}) (
 	return
 }
 
-func (db *Database) Update(po PersistentObject, selector, changer interface{}) (err error) {
+func (db *Database) Update(po PersistentObject, selector, changer interface{}) (ok bool, err error) {
 	db.CollectionDo(po.CollectionName(), func(rc *mgo.Collection) {
 		err = rc.Update(selector, changer)
 	})
-	return
+
+	if err != nil {
+		if err == mgo.ErrNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
 }
 
-func (db *Database) UpdateInstance(po PersistentObject, changer interface{}) (err error) {
+func (db *Database) UpdateInstance(po PersistentObject, changer interface{}) (ok bool, err error) {
 	db.CollectionDo(po.CollectionName(), func(rc *mgo.Collection) {
 		err = rc.Update(bson.M{"_id": po.MakeId()}, changer)
 	})
-	return
+
+	if err != nil {
+		if err == mgo.ErrNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
 }
 
 func (db *Database) UpdateAll(po PersistentObject, selector, changer interface{}) (info *mgo.ChangeInfo, err error) {
