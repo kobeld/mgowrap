@@ -49,11 +49,6 @@ func (db *Database) Find(query, result interface{}) (err error) {
 	db.CollectionDo(callCollectionName(item), func(c *mgo.Collection) {
 		err = c.Find(query).One(result)
 	})
-
-	if err == mgo.ErrNotFound {
-		err = nil
-	}
-
 	return
 }
 
@@ -62,11 +57,6 @@ func (db *Database) FindAndSelect(query, selector, result interface{}) (err erro
 	db.CollectionDo(callCollectionName(item), func(c *mgo.Collection) {
 		err = c.Find(query).Select(selector).One(result)
 	})
-
-	if err == mgo.ErrNotFound {
-		err = nil
-	}
-
 	return
 }
 
@@ -75,10 +65,6 @@ func (db *Database) FindAndApply(query interface{}, change mgo.Change, result in
 	db.CollectionDo(callCollectionName(item), func(c *mgo.Collection) {
 		info, err = c.Find(query).Apply(change, result)
 	})
-
-	if err == mgo.ErrNotFound {
-		err = nil
-	}
 	return
 }
 
@@ -115,34 +101,20 @@ func (db *Database) Upsert(po PersistentObject, selector, changer interface{}) (
 	return
 }
 
-func (db *Database) Update(po PersistentObject, selector, changer interface{}) (ok bool, err error) {
+func (db *Database) Update(po PersistentObject, selector, changer interface{}) (err error) {
 	db.CollectionDo(po.CollectionName(), func(rc *mgo.Collection) {
 		err = rc.Update(selector, changer)
 	})
 
-	if err != nil {
-		if err == mgo.ErrNotFound {
-			return false, nil
-		}
-		return false, err
-	}
-
-	return true, nil
+	return
 }
 
-func (db *Database) UpdateInstance(po PersistentObject, changer interface{}) (ok bool, err error) {
+func (db *Database) UpdateInstance(po PersistentObject, changer interface{}) (err error) {
 	db.CollectionDo(po.CollectionName(), func(rc *mgo.Collection) {
 		err = rc.Update(bson.M{"_id": po.MakeId()}, changer)
 	})
 
-	if err != nil {
-		if err == mgo.ErrNotFound {
-			return false, nil
-		}
-		return false, err
-	}
-
-	return true, nil
+	return
 }
 
 func (db *Database) UpdateAll(po PersistentObject, selector, changer interface{}) (info *mgo.ChangeInfo, err error) {
@@ -152,22 +124,15 @@ func (db *Database) UpdateAll(po PersistentObject, selector, changer interface{}
 	return
 }
 
-func (db *Database) Delete(po PersistentObject, selector interface{}) (ok bool, err error) {
+func (db *Database) Delete(po PersistentObject, selector interface{}) (err error) {
 	db.CollectionDo(po.CollectionName(), func(rc *mgo.Collection) {
 		err = rc.Remove(selector)
 	})
 
-	if err != nil {
-		if err == mgo.ErrNotFound {
-			return false, nil
-		}
-		return false, err
-	}
-
-	return true, nil
+	return
 }
 
-func (db *Database) DeleteInstance(po PersistentObject) (ok bool, err error) {
+func (db *Database) DeleteInstance(po PersistentObject) (err error) {
 	return db.Delete(po, bson.M{"_id": po.MakeId()})
 }
 

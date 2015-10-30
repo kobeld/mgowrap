@@ -83,11 +83,11 @@ func Upsert(po PersistentObject, selector, changer interface{}) (*mgo.ChangeInfo
 	return defaultDatabase.Upsert(po, selector, changer)
 }
 
-func Update(po PersistentObject, selector, changer interface{}) (bool, error) {
+func Update(po PersistentObject, selector, changer interface{}) error {
 	return defaultDatabase.Update(po, selector, changer)
 }
 
-func UpdateInstance(po PersistentObject, changer interface{}) (bool, error) {
+func UpdateInstance(po PersistentObject, changer interface{}) error {
 	return defaultDatabase.UpdateInstance(po, changer)
 }
 
@@ -95,11 +95,11 @@ func UpdateAll(po PersistentObject, selector, changer interface{}) (*mgo.ChangeI
 	return defaultDatabase.UpdateAll(po, selector, changer)
 }
 
-func Delete(po PersistentObject, selector interface{}) (bool, error) {
+func Delete(po PersistentObject, selector interface{}) error {
 	return defaultDatabase.Delete(po, selector)
 }
 
-func DeleteInstance(po PersistentObject) (bool, error) {
+func DeleteInstance(po PersistentObject) error {
 	return defaultDatabase.DeleteInstance(po)
 }
 
