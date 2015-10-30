@@ -1,6 +1,7 @@
 package mgowrap
 
 import (
+	"errors"
 	"reflect"
 
 	"gopkg.in/mgo.v2"
@@ -84,10 +85,14 @@ func (db *Database) FindAndApply(query interface{}, change mgo.Change, result in
 func (db *Database) FindAll(query interface{}, result interface{}, sortFields ...string) (err error) {
 	resultv := reflect.ValueOf(result)
 	resultvKind := resultv.Kind()
-	slicev := resultv.Elem()
 
-	if resultvKind != reflect.Ptr || slicev.Kind() != reflect.Slice {
-		panic("result argument must be a slice address")
+	if resultvKind != reflect.Ptr {
+		return errors.New("Result argument must be a pointer to slice")
+	}
+
+	slicev := resultv.Elem()
+	if slicev.Kind() != reflect.Slice {
+		return errors.New("Result argument must be a pointer to slice")
 	}
 
 	element := slicev.Type().Elem().Elem()
