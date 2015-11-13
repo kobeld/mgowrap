@@ -41,10 +41,7 @@ func CollectionsDo(f func(c ...*mgo.Collection), names ...string) {
 // Curd functions
 
 func Save(po PersistentObject, funcs ...func()) error {
-	for _, f := range funcs {
-		f()
-	}
-	return defaultDatabase.Save(po)
+	return defaultDatabase.Save(po, funcs...)
 }
 
 func SaveAll(items []interface{}) error {

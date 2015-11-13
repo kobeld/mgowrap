@@ -13,7 +13,12 @@ type PersistentObject interface {
 	MakeId() interface{}
 }
 
-func (db *Database) Save(po PersistentObject) (err error) {
+func (db *Database) Save(po PersistentObject, funcs ...func()) (err error) {
+
+	for _, f := range funcs {
+		f()
+	}
+
 	db.CollectionDo(po.CollectionName(), func(rc *mgo.Collection) {
 		_, err = rc.Upsert(bson.M{"_id": po.MakeId()}, po)
 	})
