@@ -76,6 +76,10 @@ func FindAll(query interface{}, result interface{}, sortFilelds ...string) error
 	return defaultDatabase.FindAll(query, result, sortFilelds...)
 }
 
+func FindWithLimit(query interface{}, result interface{}, limit int, sortFilelds ...string) error {
+	return defaultDatabase.FindWithLimit(query, result, limit, sortFilelds...)
+}
+
 func Upsert(po PersistentObject, selector, changer interface{}) (*mgo.ChangeInfo, error) {
 	return defaultDatabase.Upsert(po, selector, changer)
 }

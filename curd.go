@@ -99,6 +99,39 @@ func (db *Database) FindAll(query interface{}, result interface{}, sortFields ..
 	return
 }
 
+func (db *Database) FindWithLimit(selector interface{}, result interface{}, limit int, sortFields ...string) (err error) {
+	resultv := reflect.ValueOf(result)
+	resultvKind := resultv.Kind()
+
+	if resultvKind != reflect.Ptr {
+		return errors.New("Result argument must be a pointer to slice")
+	}
+
+	slicev := resultv.Elem()
+	if slicev.Kind() != reflect.Slice {
+		return errors.New("Result argument must be a pointer to slice")
+	}
+
+	element := slicev.Type().Elem().Elem()
+	newValue := reflect.New(element)
+
+	db.CollectionDo(callCollectionName(newValue), func(c *mgo.Collection) {
+
+		query := c.Find(selector)
+
+		if len(sortFields) > 0 {
+			query.Sort(sortFields...)
+		}
+
+		if limit > 0 {
+			query.Limit(limit)
+		}
+
+		err = query.All(result)
+	})
+	return
+}
+
 func (db *Database) Upsert(po PersistentObject, selector, changer interface{}) (changeInfo *mgo.ChangeInfo, err error) {
 	db.CollectionDo(po.CollectionName(), func(rc *mgo.Collection) {
 		changeInfo, err = rc.Upsert(selector, changer)
