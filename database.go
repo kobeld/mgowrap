@@ -20,6 +20,10 @@ func NewDatabase(dialString string, name string) (db *Database) {
 var ConnectedSessions map[string]*mgo.Session
 
 func (db *Database) GetOrDialSession() (session *mgo.Session) {
+	if db == nil {
+		panic("mgo: Database is nil")
+	}
+
 	if db.Name == "" || db.DialString == "" {
 		panic("mgo: must provide valid dialstring and database name")
 	}

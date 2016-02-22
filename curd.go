@@ -3,6 +3,7 @@ package mgowrap
 import (
 	"errors"
 	"reflect"
+	"strings"
 
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -119,8 +120,15 @@ func (db *Database) FindWithLimit(selector interface{}, result interface{}, limi
 
 		query := c.Find(selector)
 
-		if len(sortFields) > 0 {
-			query.Sort(sortFields...)
+		// Ensure the sort fields are not empty
+		var validFields = []string{}
+		for _, field := range sortFields {
+			if str := strings.TrimSpace(field); str != "" {
+				validFields = append(validFields, strings.ToLower(str))
+			}
+		}
+		if len(validFields) > 0 {
+			query.Sort(validFields...)
 		}
 
 		if limit > 0 {
