@@ -51,46 +51,63 @@ func (db *Database) FindByIdHex(idHex string, result interface{}) (err error) {
 }
 
 func (db *Database) Find(query, result interface{}) (err error) {
-	item := reflect.ValueOf(result).Elem()
-	db.CollectionDo(callCollectionName(item), func(c *mgo.Collection) {
+
+	name, err := callCollectionNameForSingleItem(result)
+	if err != nil {
+		return
+	}
+
+	db.CollectionDo(name, func(c *mgo.Collection) {
 		err = c.Find(query).One(result)
 	})
 	return
 }
 
 func (db *Database) FindAndSelect(query, selector, result interface{}) (err error) {
-	item := reflect.ValueOf(result).Elem()
-	db.CollectionDo(callCollectionName(item), func(c *mgo.Collection) {
+
+	name, err := callCollectionNameForSingleItem(result)
+	if err != nil {
+		return
+	}
+
+	db.CollectionDo(name, func(c *mgo.Collection) {
 		err = c.Find(query).Select(selector).One(result)
 	})
 	return
 }
 
+func (db *Database) FindAllAndSelect(query, selector, result interface{}) (err error) {
+
+	name, err := callCollectionNameForItems(result)
+	if err != nil {
+		return
+	}
+
+	db.CollectionDo(name, func(c *mgo.Collection) {
+		err = c.Find(query).Select(selector).All(result)
+	})
+	return
+}
+
 func (db *Database) FindAndApply(query interface{}, change mgo.Change, result interface{}) (info *mgo.ChangeInfo, err error) {
-	item := reflect.ValueOf(result).Elem()
-	db.CollectionDo(callCollectionName(item), func(c *mgo.Collection) {
+	name, err := callCollectionNameForSingleItem(result)
+	if err != nil {
+		return
+	}
+
+	db.CollectionDo(name, func(c *mgo.Collection) {
 		info, err = c.Find(query).Apply(change, result)
 	})
 	return
 }
 
 func (db *Database) FindAll(query interface{}, result interface{}, sortFields ...string) (err error) {
-	resultv := reflect.ValueOf(result)
-	resultvKind := resultv.Kind()
-
-	if resultvKind != reflect.Ptr {
-		return errors.New("Result argument must be a pointer to slice")
+	name, err := callCollectionNameForItems(result)
+	if err != nil {
+		return
 	}
 
-	slicev := resultv.Elem()
-	if slicev.Kind() != reflect.Slice {
-		return errors.New("Result argument must be a pointer to slice")
-	}
-
-	element := slicev.Type().Elem().Elem()
-	newValue := reflect.New(element)
-
-	db.CollectionDo(callCollectionName(newValue), func(c *mgo.Collection) {
+	db.CollectionDo(name, func(c *mgo.Collection) {
 		if len(sortFields) == 0 {
 			err = c.Find(query).All(result)
 		} else {
@@ -101,22 +118,12 @@ func (db *Database) FindAll(query interface{}, result interface{}, sortFields ..
 }
 
 func (db *Database) FindWithLimit(selector interface{}, result interface{}, limit int, sortFields ...string) (err error) {
-	resultv := reflect.ValueOf(result)
-	resultvKind := resultv.Kind()
-
-	if resultvKind != reflect.Ptr {
-		return errors.New("Result argument must be a pointer to slice")
+	name, err := callCollectionNameForItems(result)
+	if err != nil {
+		return
 	}
 
-	slicev := resultv.Elem()
-	if slicev.Kind() != reflect.Slice {
-		return errors.New("Result argument must be a pointer to slice")
-	}
-
-	element := slicev.Type().Elem().Elem()
-	newValue := reflect.New(element)
-
-	db.CollectionDo(callCollectionName(newValue), func(c *mgo.Collection) {
+	db.CollectionDo(name, func(c *mgo.Collection) {
 
 		query := c.Find(selector)
 
@@ -206,13 +213,22 @@ func (db *Database) HasAny(po PersistentObject, selector bson.M) (r bool, err er
 	return
 }
 
-func callCollectionName(value reflect.Value) string {
-	method := value.MethodByName("CollectionName")
-	if !method.IsValid() {
-		panic(value.String() + ` does not implement "CollectionName" method`)
+func callCollectionNameForSingleItem(result interface{}) (name string, err error) {
+	resultv := reflect.ValueOf(result)
+	if resultv.Kind() != reflect.Ptr {
+		err = errors.New("Result argument must be a pointer")
+		return
 	}
 
-	return method.Call([]reflect.Value{})[0].String()
+	item := resultv.Elem()
+	if item.Kind() != reflect.Ptr && item.Kind() != reflect.Struct {
+		err = errors.New("Result argument must point to a struct or struct pointer")
+		return
+	}
+
+	name = callCollectionName(item)
+
+	return
 }
 
 func (db *Database) DropCollection(collectionName string) (err error) {
@@ -220,6 +236,40 @@ func (db *Database) DropCollection(collectionName string) (err error) {
 		err = rc.DropCollection()
 	})
 	return
+}
+
+// ======
+// ====== Private =====
+// ======
+func callCollectionNameForItems(result interface{}) (name string, err error) {
+	resultv := reflect.ValueOf(result)
+
+	if resultv.Kind() != reflect.Ptr {
+		err = errors.New("Result argument must be a pointer to slice")
+		return
+	}
+
+	slicev := resultv.Elem()
+	if slicev.Kind() != reflect.Slice {
+		err = errors.New("Result argument must pointer to a slice")
+		return
+	}
+
+	element := slicev.Type().Elem().Elem()
+	newValue := reflect.New(element)
+
+	name = callCollectionName(newValue)
+
+	return
+}
+
+func callCollectionName(value reflect.Value) string {
+	method := value.MethodByName("CollectionName")
+	if !method.IsValid() {
+		panic(value.String() + ` does not implement "CollectionName" method`)
+	}
+
+	return method.Call([]reflect.Value{})[0].String()
 }
 
 // func (db *Database) DropCollections(collectionNames ...string) (err error) {
