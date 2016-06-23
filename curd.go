@@ -14,6 +14,13 @@ type PersistentObject interface {
 	MakeId() interface{}
 }
 
+func (db *Database) EnsureIndexKey(po PersistentObject, keys ...string) (err error) {
+	db.CollectionDo(po.CollectionName(), func(rc *mgo.Collection) {
+		err = rc.EnsureIndexKey(keys...)
+	})
+	return
+}
+
 func (db *Database) Save(po PersistentObject, funcs ...func()) (err error) {
 
 	for _, f := range funcs {
@@ -21,6 +28,7 @@ func (db *Database) Save(po PersistentObject, funcs ...func()) (err error) {
 	}
 
 	db.CollectionDo(po.CollectionName(), func(rc *mgo.Collection) {
+
 		_, err = rc.Upsert(bson.M{"_id": po.MakeId()}, po)
 	})
 	return

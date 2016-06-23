@@ -38,6 +38,10 @@ func CollectionsDo(f func(c ...*mgo.Collection), names ...string) {
 	defaultDatabase.CollectionsDo(f, names...)
 }
 
+func EnsureIndexKey(po PersistentObject, keys ...string) {
+	defaultDatabase.EnsureIndexKey(po, keys...)
+}
+
 // Curd functions
 
 func Save(po PersistentObject, funcs ...func()) error {
