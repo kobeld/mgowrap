@@ -155,6 +155,40 @@ func (db *Database) FindWithLimit(selector interface{}, result interface{}, limi
 	return
 }
 
+func (db *Database) FindWithSkipAndLimit(selector interface{}, result interface{}, skip, limit int, sortFields ...string) (err error) {
+	name, err := callCollectionNameForItems(result)
+	if err != nil {
+		return
+	}
+
+	db.CollectionDo(name, func(c *mgo.Collection) {
+
+		query := c.Find(selector)
+
+		// Ensure the sort fields are not empty
+		var validFields = []string{}
+		for _, field := range sortFields {
+			if str := strings.TrimSpace(field); str != "" {
+				validFields = append(validFields, strings.ToLower(str))
+			}
+		}
+		if len(validFields) > 0 {
+			query.Sort(validFields...)
+		}
+
+		if skip > 0 {
+			query.Limit(skip)
+		}
+
+		if limit > 0 {
+			query.Limit(limit)
+		}
+
+		err = query.All(result)
+	})
+	return
+}
+
 func (db *Database) Upsert(po PersistentObject, selector, changer interface{}) (changeInfo *mgo.ChangeInfo, err error) {
 	db.CollectionDo(po.CollectionName(), func(rc *mgo.Collection) {
 		changeInfo, err = rc.Upsert(selector, changer)
