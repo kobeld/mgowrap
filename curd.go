@@ -177,7 +177,7 @@ func (db *Database) FindWithSkipAndLimit(selector interface{}, result interface{
 		}
 
 		if skip > 0 {
-			query.Limit(skip)
+			query.Skip(skip)
 		}
 
 		if limit > 0 {
