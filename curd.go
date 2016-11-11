@@ -38,7 +38,7 @@ func (db *Database) SaveAll(items []interface{}) (err error) {
 	if len(items) == 0 {
 		return
 	}
-	item := reflect.ValueOf(items[0]).Elem()
+	item := reflect.ValueOf(items[0])
 	db.CollectionDo(callCollectionName(item), func(rc *mgo.Collection) {
 		err = rc.Insert(items...)
 	})
