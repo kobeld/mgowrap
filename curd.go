@@ -84,7 +84,7 @@ func (db *Database) FindAndSelect(query, selector, result interface{}) (err erro
 	return
 }
 
-func (db *Database) FindAllAndSelect(query, selector, result interface{}) (err error) {
+func (db *Database) FindAllAndSelect(query, selector, result interface{}, sortFields ...string) (err error) {
 
 	name, err := callCollectionNameForItems(result)
 	if err != nil {
@@ -92,7 +92,12 @@ func (db *Database) FindAllAndSelect(query, selector, result interface{}) (err e
 	}
 
 	db.CollectionDo(name, func(c *mgo.Collection) {
-		err = c.Find(query).Select(selector).All(result)
+
+		if len(sortFields) == 0 {
+			err = c.Find(query).Select(selector).All(result)
+		} else {
+			err = c.Find(query).Sort(sortFields...).Select(selector).All(result)
+		}
 	})
 	return
 }

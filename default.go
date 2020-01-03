@@ -11,7 +11,7 @@ func DefaultDatabase() *Database {
 	return defaultDatabase
 }
 
-func SetupDatbase(dialString string, name string) {
+func SetupDatabase(dialString string, name string) {
 	defaultDatabase = NewDatabase(dialString, name)
 }
 
@@ -80,12 +80,17 @@ func FindAll(query interface{}, result interface{}, sortFilelds ...string) error
 	return defaultDatabase.FindAll(query, result, sortFilelds...)
 }
 
-func FindAllAndSelect(query, selector, result interface{}) error {
-	return defaultDatabase.FindAllAndSelect(query, selector, result)
+func FindAllAndSelect(query, selector, result interface{}, sortFields ...string) error {
+	return defaultDatabase.FindAllAndSelect(query, selector, result, sortFields...)
 }
 
 func FindWithLimit(query interface{}, result interface{}, limit int, sortFilelds ...string) error {
 	return defaultDatabase.FindWithLimit(query, result, limit, sortFilelds...)
+}
+
+func FindWithSkipAndLimit(query interface{}, result interface{}, skip, limit int, sortFilelds ...string) error {
+	return defaultDatabase.FindWithSkipAndLimit(query, result, skip, limit, sortFilelds...)
+
 }
 
 func Upsert(po PersistentObject, selector, changer interface{}) (*mgo.ChangeInfo, error) {
